@@ -1,3 +1,4 @@
+# -- coding:utf-8 --
 import numpy as np
 import pandas as pd
 import os
@@ -19,11 +20,10 @@ def read_label_xml(filename):
     collection = DOMTree.documentElement
 
     coordinates = []
-    print(dir(collection))
     objects = collection.getElementsByTagName('object')
     size = collection.getElementsByTagName('size')
-    width = size.getElementsByTagName('width')
-    height = size.getElementsByTagName('height')
+    width = int(size[0].getElementsByTagName('width')[0].childNodes[0].data)
+    height = int(size[0].getElementsByTagName('height')[0].childNodes[0].data)
     for single_object in objects:
         # 类别名称
         name = single_object.getElementsByTagName('name')[0].childNodes[0].data
@@ -44,19 +44,28 @@ def gaussian_kernel_2d_opencv(kernel_size = 3,sigma = 0):
 
 def label2density(label):
     width, height = label['shape']
-    density_map = np.zeros((width, height), np.float)
-    coordinates = label['coordinate']
+    density_map = np.zeros((height, width), np.float)
+    coordinates = label['coordinates']
     for coordinate in coordinates:
         xmin = coordinate[0]
         ymin = coordinate[1]
         xmax = coordinate[2]
         ymax = coordinate[3]
 
-        diameter = np.max(xmax - xmin, ymax - ymin)
-        kernel_size = np.max(xmax - xmin, ymax - ymin)
-        kernel = gaussian_kernel_2d_opencv(kernel_size, 1)
-        for i in range(max(xmin, 0), min(xmax, width)):
-            for j in range(max(ymin, 0), min(xmin, height)):
+        kernel_size = max(xmax - xmin, ymax - ymin)
+        kernel = gaussian_kernel_2d_opencv(kernel_size, 25)
+        # print(np.sum(kernel))
+        xcenter = (xmax + xmin) // 2
+        ycenter = (ymax + ymin) // 2
+        half_kernel_size = kernel_size // 2
+        xmin = xcenter - half_kernel_size
+        xmax = xcenter + half_kernel_size
+        ymin = ycenter - half_kernel_size
+        ymax = ycenter + half_kernel_size
+        # print('*****************************************')
+        # print(kernel.shape)
+        for i in range(max(xmin, 0), min(xmax, height - 1)):
+            for j in range(max(ymin, 0), min(ymax, width - 1)):
                 density_map[i][j] += kernel[i - xmin][j - ymin]
     return density_map
 
@@ -64,6 +73,11 @@ def label_path2density_map(label_path):
     label = read_label_xml(label_path)
     density_map = label2density(label)
     return density_map
+
+
+def normalization(data):
+    _range = np.max(data) - np.min(data)
+    return 255 * ((data - np.min(data)) / _range)
 
 def generate_density_dataset(file_list, output_path, slice_number=1):
     for file in file_list:
@@ -73,8 +87,10 @@ def generate_density_dataset(file_list, output_path, slice_number=1):
         density_map = label_path2density_map(label_path)
 
         image_name = os.path.basename(image_path).split('.')[0] + '.png'
-        io.imsave(density_map, os.path.join(output_path, image_name))
-
+        np.save(os.path.join(output_path, image_name.split('.')[0] + '.npy'), density_map)
+        scaled_density_map = normalization(density_map).astype(np.uint8)
+        io.imsave(os.path.join(output_path, image_name), scaled_density_map)
+        print(image_name + ' done!')
 
         # for j in range(1, 4):
         #         px = 1
@@ -114,10 +130,9 @@ def generate_density_dataset(file_list, output_path, slice_number=1):
 
 
 if __name__ == '__main__':
-    img_path = 'datasets/spruce/202011/train'
-    gt_path = 'datasets/spruce/202011/train'
-    #train_gt = 'datasets/ShanghaiTech_Crowd_Counting_Dataset/part_A_final/train_data/ground_truth'
-    out_path = 'datasets/spruce/202011_den'
+    img_path = 'spruce/202011/train'
+    gt_path = 'spruce/202011/train'
+    out_path = 'spruce/202011_den'
     if not os.path.exists(out_path):
         os.mkdir(out_path)
 
@@ -150,4 +165,4 @@ if __name__ == '__main__':
     print('验证集保存位置：' + validation_output_path)
 
     generate_density_dataset(train_list, train_output_path, N)
-    generate_density_dataset(validation_list, validation_output_path, N)
+    # generate_density_dataset(validation_list, validation_output_path, N)
