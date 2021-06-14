@@ -53,7 +53,7 @@ def label2density(label):
         ymax = coordinate[3]
 
         kernel_size = max(xmax - xmin, ymax - ymin)
-        kernel = gaussian_kernel_2d_opencv(kernel_size, 25)
+        kernel = gaussian_kernel_2d_opencv(kernel_size, kernel_size / 10)
         # print(np.sum(kernel))
         xcenter = (xmax + xmin) // 2
         ycenter = (ymax + ymin) // 2
@@ -91,43 +91,6 @@ def generate_density_dataset(file_list, output_path, slice_number=1):
         scaled_density_map = normalization(density_map).astype(np.uint8)
         io.imsave(os.path.join(output_path, image_name), scaled_density_map)
         print(image_name + ' done!')
-
-        # for j in range(1, 4):
-        #         px = 1
-        #         px2 = 1
-        #         for k in range(1, 4):
-        #             print('global' + str(global_step))
-        #         # print('j' + str(j))
-        #         # print('k' +str(k))
-        #         print('----------')
-        #         if (global_step == 4 & j == 3 & k == 4):
-        #             print('global' + str(global_step))
-        #         final_image = img[py - 1: py + p_h - 1, px - 1: px + p_w - 1, :]
-        #         final_gt = den_map[py2 - 1: py2 + d_map_ph - 1, px2 - 1: px2 + d_map_pw - 1]
-        #         px = px + p_w
-        #         px2 = px2 + d_map_pw
-        #         if final_image.shape[2] < 3:
-        #             final_image = np.tile(final_image, [1, 1, 3])
-        #         image_final_name = out_path + mode + '_img/' 'IMG_' + str(i) + '_' + str(count) + '.jpg'
-        #         #gt_final_name = out_path + mode + '_gt/' + 'GT_IMG_' + str(i) + '_' + str(count)
-        #         gt_final_name = out_path + mode + '_gt/' + 'IMG_' + str(i) + '_' + str(count) + '.csv'
-        #         Image.fromarray(final_image).convert('RGB').save(image_final_name)
-        #         #np.save(gt_final_name, final_gt)
-        #         # dataframe = pd.DataFrame(final_gt, index=False)
-        #         # dataframe.to_csv("test.csv", index=False, sep=',')
-        #         np.savetxt(gt_final_name, final_gt, fmt='%f', delimiter=',')
-        #         #归一化至（0，1）
-        #         temp = np.max(final_gt) - np.min(final_gt)
-        #         nomalized_final_gt = np.clip((final_gt * 1 / temp) - (np.min(final_gt) / temp), 0, 1)
-        #         # print(np.max(nomalized_final_gt), np.min(nomalized_final_gt))
-        #         io.imsave(gt_final_name.split('.')[0] + '.png', nomalized_final_gt)
-        #         # Image.fromarray(final_gt).convert('L').save(gt_final_name.split('.')[0] + '.png')
-        #         count = count + 1
-        #     py = py + p_h
-        #     py2 = py2 + d_map_ph
-        # global_step = global_step + 1
-
-
 
 if __name__ == '__main__':
     img_path = 'spruce/202011/train'
