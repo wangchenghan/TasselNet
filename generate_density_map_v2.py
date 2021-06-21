@@ -2,11 +2,8 @@
 import numpy as np
 import pandas as pd
 import os
-import matplotlib.image as mpimg
 from skimage import io
 import matplotlib.pyplot as plt
-from sklearn.neighbors import NearestNeighbors
-from PIL import Image
 from skimage import io, img_as_ubyte
 import glob
 import cv2
