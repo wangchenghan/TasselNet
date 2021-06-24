@@ -1,14 +1,16 @@
 # -- coding:utf-8 --
-import numpy as np
-import pandas as pd
 import os
-from skimage import io
-import matplotlib.pyplot as plt
-from skimage import io, img_as_ubyte
 import glob
 import cv2
 import math
 import random
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from skimage import io
+from skimage.transform import resize
+from utils import *
 from xml.dom import minidom
 
 def read_label_xml(filename):
@@ -50,7 +52,7 @@ def label2density(label):
         ymax = coordinate[3]
 
         kernel_size = max(xmax - xmin, ymax - ymin)
-        kernel = gaussian_kernel_2d_opencv(kernel_size, kernel_size / 10)
+        kernel = gaussian_kernel_2d_opencv(kernel_size, kernel_size / 5)
         # print(np.sum(kernel))
         xcenter = (xmax + xmin) // 2
         ycenter = (ymax + ymin) // 2
@@ -61,9 +63,9 @@ def label2density(label):
         ymax = ycenter + half_kernel_size
         # print('*****************************************')
         # print(kernel.shape)
-        for i in range(max(xmin, 0), min(xmax, height - 1)):
-            for j in range(max(ymin, 0), min(ymax, width - 1)):
-                density_map[i][j] += kernel[i - xmin][j - ymin]
+        for i in range(max(ymin, 0), min(ymax, height - 1)):
+            for j in range(max(xmin, 0), min(xmax, width - 1)):
+                density_map[i][j] += kernel[i - ymin][j - xmin]
     return density_map
 
 def label_path2density_map(label_path):
@@ -76,13 +78,14 @@ def normalization(data):
     _range = np.max(data) - np.min(data)
     return 255 * ((data - np.min(data)) / _range)
 
-def generate_density_dataset(file_list, output_path, slice_number=1):
+def generate_density_dataset(file_list, output_path, size=None):
     for file in file_list:
         image_path = file['image']
         label_path = file['label']
 
         density_map = label_path2density_map(label_path)
-
+        if size and len(size) == 2:
+            density_map = desity_map_resize_v3(density_map, size)
         image_name = os.path.basename(image_path).split('.')[0] + '.png'
         np.save(os.path.join(output_path, image_name.split('.')[0] + '.npy'), density_map)
         scaled_density_map = normalization(density_map).astype(np.uint8)
@@ -93,10 +96,11 @@ if __name__ == '__main__':
     img_path = 'spruce/202011/train'
     gt_path = 'spruce/202011/train'
     out_path = 'spruce/202011_den'
+
+    size = (300, 400)
     if not os.path.exists(out_path):
         os.mkdir(out_path)
 
-    N = 4
     TRAIN_RATE = 0.7
 
     IMAGE_FORMAT = ['jpg', 'JPG', 'PNG', 'png', 'bmp', 'BMP']
@@ -124,5 +128,5 @@ if __name__ == '__main__':
     print('训练集保存位置：' + train_output_path)
     print('验证集保存位置：' + validation_output_path)
 
-    generate_density_dataset(train_list, train_output_path, N)
+    generate_density_dataset(train_list, train_output_path, size=size)
     # generate_density_dataset(validation_list, validation_output_path, N)

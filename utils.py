@@ -19,14 +19,14 @@ def generate_slices(image, window_size=32, slide=1):
             result.append(cropped_image)
     return result
 
-def generate_slices_labels(label_image, window_size=32, slide=1):
+def generate_slices_labels(density_map, window_size=32, slide=1):
     if window_size % 2 == 0:
         raise Exception("窗口大小应该是奇数")
     pad_size = window_size // 2
     result = []
-    padded_image = np.pad(label_image, ((pad_size, pad_size), (pad_size, pad_size)), 'constant')
-    for i in range(label_image.shape[0]):
-        for j in range(label_image.shape[1]):
+    padded_image = np.pad(density_map, ((pad_size, pad_size), (pad_size, pad_size)), 'constant')
+    for i in range(density_map.shape[0]):
+        for j in range(density_map.shape[1]):
             ground_truth_value = padded_image[(2 * i + window_size) // 2, (2 * j + window_size) // 2]
             result.append(ground_truth_value)
     return result
@@ -40,22 +40,22 @@ def desity_map_resize_v1(desity_array, size):
     """
     if len(size) != 2:
         raise Exception("Wrong size for resize density map, only two demension is needed")
-    origin_width = desity_array.shape[0]
-    origin_height = desity_array.shape[1]
-    resized_width = size[0]
-    resized_height = size[1]
-    middle_width = origin_width * resized_width
+    origin_height = desity_array.shape[0]
+    origin_width = desity_array.shape[1]
+    resized_height = size[0]
+    resized_width = size[1]
     middle_height = origin_height * resized_height
+    middle_width = origin_width * resized_width
 
-    middle_array = np.zeros((middle_width, middle_height), np.float)
-    resized_array = np.zeros((resized_width, resized_height), np.float)
+    middle_array = np.zeros((middle_height, middle_width), np.float)
+    resized_array = np.zeros((resized_height, resized_width), np.float)
 
-    for i in range(origin_width):
-        for j in range(origin_height):
-            middle_array[resized_width * i: resized_width * (i + 1), resized_height * j: resized_height * (j + 1)] = float(desity_array[i][j]) / ( resized_width * resized_height )
-    for i in range(resized_width):
-        for j in range(resized_height):
-            resized_array[i][j] = np.sum(middle_array[origin_width * i: origin_width * (i + 1), origin_height * j: origin_height * (j + 1)])
+    for i in range(origin_height):
+        for j in range(origin_width):
+            middle_array[resized_height * i: resized_height * (i + 1), resized_width * j: resized_width * (j + 1)] = float(desity_array[i][j]) / ( resized_height * resized_width )
+    for i in range(resized_height):
+        for j in range(resized_width):
+            resized_array[i][j] = np.sum(middle_array[origin_height * i: origin_height * (i + 1), origin_width * j: origin_width * (j + 1)])
     return resized_array
 
 def desity_map_resize_v2(desity_array, size):
@@ -67,16 +67,16 @@ def desity_map_resize_v2(desity_array, size):
     """
     if len(size) != 2:
         raise Exception("Wrong size for resize density map, only two demension is needed")
-    origin_width = desity_array.shape[0]
-    origin_height = desity_array.shape[1]
-    resized_width = size[0]
-    resized_height = size[1]
-    resized_array = np.zeros((resized_width, resized_height), np.float)
-    for i in range(resized_width):
-        for j in range(resized_height):
-            for m in range(origin_width * i, origin_width * (i + 1)):
-                for n in range(origin_height * j, origin_height * (j + 1)):
-                    resized_array[i][j] += float(desity_array[m // resized_width][n // resized_height]) / ( resized_width * resized_height )
+    origin_height = desity_array.shape[0]
+    origin_width = desity_array.shape[1]
+    resized_height = size[0]
+    resized_width = size[1]
+    resized_array = np.zeros((resized_height, resized_width), np.float)
+    for i in range(resized_height):
+        for j in range(resized_width):
+            for m in range(origin_height * i, origin_height * (i + 1)):
+                for n in range(origin_width * j, origin_width * (j + 1)):
+                    resized_array[i][j] += float(desity_array[m // resized_height][n // resized_width]) / ( resized_height * resized_width )
     return resized_array
 
 def desity_map_resize_v3(desity_array, size):
@@ -89,9 +89,9 @@ def desity_map_resize_v3(desity_array, size):
     """
     if len(size) != 2:
         raise Exception("Wrong size for resize density map, only two demension is needed")
-    resized_width = size[0]
-    resized_height = size[1]
-    resized_array = resize(desity_array, (resized_width, resized_height))
+    resized_height = size[0]
+    resized_width = size[1]
+    resized_array = resize(desity_array, (resized_height, resized_width))
     resized_array = resized_array * ( np.sum(desity_array) / np.sum(resized_array))
     return resized_array
 
@@ -104,11 +104,11 @@ def desity_map_resize_v4(desity_array, size):
     """
     if len(size) != 2:
         raise Exception("Wrong size for resize density map, only two demension is needed")
-    origin_width = desity_array.shape[0]
-    origin_height = desity_array.shape[1]
-    resized_width = size[0]
-    resized_height = size[1]
-    resized_array = np.zeros((resized_width, resized_height), np.float)
+    origin_height = desity_array.shape[0]
+    origin_width = desity_array.shape[1]
+    resized_height = size[0]
+    resized_width = size[1]
+    resized_array = np.zeros((resized_height, resized_width), np.float)
 
     return resized_array
 
