@@ -1,5 +1,6 @@
 import keras
 from keras import layers
+from keras import optimizers
 
 data_augmentation = keras.Sequential(
     [
@@ -7,6 +8,7 @@ data_augmentation = keras.Sequential(
         layers.experimental.preprocessing.RandomRotation(0.1)
     ]
 )
+
 def LeNet_like(input_shape):
     inputs = keras.Input(shape=input_shape)
 
@@ -51,7 +53,7 @@ def AlexNet_like(input_shape):
     outputs = x   
     return keras.Model(inputs, outputs)
 
-def AlexNet_like(input_shape):
+def VggNet_like(input_shape):
     inputs = keras.Input(shape=input_shape)
 
     x = data_augmentation(inputs)
@@ -86,3 +88,20 @@ def AlexNet_like(input_shape):
     outputs = x   
     return keras.Model(inputs, outputs)
 
+MODELS = {
+    'lenet':{
+        "model":LeNet_like,
+        "init_weights":None
+    },
+    'alexnet':{
+        "model":AlexNet_like,
+        "init_weights":None
+    },
+    'vggnet':{
+        "model":VggNet_like,
+        "init_weights":None
+    }
+}
+
+if __name__ == '__main__':
+    pass
