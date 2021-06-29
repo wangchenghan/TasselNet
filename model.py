@@ -4,8 +4,8 @@ from keras import optimizers
 
 data_augmentation = keras.Sequential(
     [
-        layers.experimental.preprocessing.RandomFlip('horizontal'),
-        layers.experimental.preprocessing.RandomRotation(0.1)
+        layers.preprocessing.image_preprocessing.RandomFlip('horizontal'),
+        layers.preprocessing.image_preprocessing.RandomRotation(0.1)
     ]
 )
 
@@ -25,7 +25,7 @@ def LeNet_like(input_shape):
     x = layers.Conv2D(filters=64, kernel_size=(1, 1), activation='relu', strides=1, padding='same')(x)
 
     x = layers.Conv2D(filters=1, kernel_size=(1, 1), activation='relu', strides=1, padding='same')(x)
-    outputs = x
+    outputs = x[0][0][0] 
     return keras.Model(inputs, outputs)
 
 def AlexNet_like(input_shape):
@@ -50,7 +50,7 @@ def AlexNet_like(input_shape):
 
     x = layers.Conv2D(filters=1, kernel_size=(1, 1), activation='relu', strides=1, padding='same')(x)
 
-    outputs = x   
+    outputs = x[0][0][0]    
     return keras.Model(inputs, outputs)
 
 def VggNet_like(input_shape):
@@ -85,7 +85,7 @@ def VggNet_like(input_shape):
     x = layers.Conv2D(filters=512, kernel_size=(1, 1), activation='relu', strides=1, padding='same')(x)
     x = layers.Conv2D(filters=1, kernel_size=(1, 1), activation='relu', strides=1, padding='same')(x)
 
-    outputs = x   
+    outputs = x[0][0][0]   
     return keras.Model(inputs, outputs)
 
 MODELS = {
