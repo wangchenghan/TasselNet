@@ -38,7 +38,7 @@ class TassenlNetTrainer:
             raise NotImplementedError
         else:
             model.fit_generator(training_set_generator, epochs=epochs, verbose=1)
-        model_save_name = '_'.join([str(i) for i in [image_size[0], image_size[1],
+        model_save_name = '-'.join([str(i) for i in [image_size[0], image_size[1],
                                                     input_shape[0],input_shape[1], 
                                                     batch_size, epochs, learning_rate,
                                                     optimizer, loss, self.model_name ]

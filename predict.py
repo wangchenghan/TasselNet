@@ -40,13 +40,13 @@ class TassenlNetPredictor:
 
     def predict_by_name(self, image_size=(224,224), input_shape=(31, 31, 3), batch_size=4, epochs="*", learning_rate="*", optimizer="*", loss="*", strict=False):
         if strict:
-            saved_model_name = '_'.join([str(i) for i in [image_size[0], image_size[1],
+            saved_model_name = '-'.join([str(i) for i in [image_size[0], image_size[1],
                                                         input_shape[0],input_shape[1], 
                                                         batch_size, epochs, learning_rate,
                                                         optimizer, loss, self.model_name ]
                                                         ]) + '.h5'
         else:
-            saved_model_name = '_'.join([str(i) for i in [image_size[0], image_size[1],
+            saved_model_name = '-'.join([str(i) for i in [image_size[0], image_size[1],
                                                         input_shape[0],input_shape[1], 
                                                         "*", epochs, learning_rate,
                                                         optimizer, loss, self.model_name ]
@@ -75,7 +75,7 @@ class TassenlNetPredictor:
         result_save_dir = os.path.join(self.save_dir, os.path.basename(search_result))
         os.path.makedirs(result_save_dir)
         for i, image_name in enumerate(image_name_list):
-            
+
             density_map_save_path = os.path.join(result_save_dir, image_name.split('.')[0] + '.npy')
             np.save(density_map_save_path, density_map_array[i])
 
