@@ -1,0 +1,16 @@
+{
+    "train":[
+        {
+            "image_path": "/Users/Biomind/Documents/周文静/TasselNet/spruce/202011/train",
+            "density_map_path" : "/Users/Biomind/Documents/周文静/TasselNet/spruce/202011_den/train",
+            "image_size":[224,224],
+            "input_shape":[31, 31, 3],
+            "batch_size":4,
+            "epochs":10,
+            "learning_rate":0.01,
+            "optimizer":"adm",
+            "loss":"mean_squared_error"
+        }
+    ],
+    "predict":[{}]
+}
