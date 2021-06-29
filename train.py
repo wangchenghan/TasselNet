@@ -1,3 +1,4 @@
+# -- coding:utf-8 --
 import os
 from model import *
 from DatasetReader import DatasetReader
@@ -6,18 +7,18 @@ class TassenlNetTrainer:
     def __init__(self, model_name, paths_for_train, paths_for_validate=None, save_dir='log'):
         if len(paths_for_train) != 2:
             raise Exception("应该有两个路径，一个是图片的，一个是密度图的")
+        self.model_name = model_name
         self.paths_for_train = paths_for_train
         self.paths_for_validate = paths_for_validate
         self.save_dir = save_dir
 
-    def train(self,image_size=(224,224), input_shape=(31, 31), batch_size=4, epochs=10, learning_rate=0.01, optimizer='adm', loss='mean_squared_error'):
+    def train(self,image_size=(224,224), input_shape=(31, 31, 3), batch_size=4, epochs=10, learning_rate=0.01, optimizer='adm', loss='mean_squared_error'):
         image_path = self.paths_for_train[0]
         density_map_path = self.paths_for_train[1]
         training_set_reader = DatasetReader(image_path, density_map_path)
-        training_set_generator = training_set_reader.generate_slice_and_labels(input_shape, batch_size, image_size, acculumate_area=True)
+        training_set_generator = training_set_reader.generate_slice_and_labels(input_shape[0], batch_size, image_size, accumulate_area=True)
         # acculumate_area为True时是TasselNet的处理方式，为False时是密度图的处理方式
         model = MODELS[self.model_name.lower()]['model'](input_shape)
-
         #optimizers
         if optimizer.lower() == 'sgd':
             keras_optimizer = optimizers.SGD(lr=learning_rate, clipvalue=0.5)
@@ -54,15 +55,15 @@ if __name__ == '__main__':
     image_path = "/Users/Biomind/Documents/周文静/TasselNet/spruce/202011/train"
     density_map_path = "/Users/Biomind/Documents/周文静/TasselNet/spruce/202011_den/train"
 
-    test_trainer = TassenlNetTrainer(image_path, density_map_path)
+    test_trainer = TassenlNetTrainer("lenet",(image_path, density_map_path))
 
     # test1
-    image_size=(224,224)
-    input_shape=(31, 31)
-    batch_size=4
-    epochs=1
-    learning_rate=0.01
-    optimizer='adm'
-    loss='mean_squared_error'
+    image_size = (224,224)
+    input_shape = (31, 31, 3)
+    batch_size = 4
+    epochs = 10
+    learning_rate = 0.01
+    optimizer = 'adm'
+    loss = 'mean_squared_error'
 
     test_trainer.train(image_size, input_shape, batch_size, epochs, learning_rate, optimizer, loss)
