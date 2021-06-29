@@ -14,14 +14,19 @@ class DatasetReader:
         IMAGE_FORMAT = ['jpg', 'JPG', 'PNG', 'png', 'bmp', 'BMP']
 
         self.file_path_list = []
+        self.image_name_list = []
         for image_format in IMAGE_FORMAT:
             exists_images = glob.glob(os.path.join(self.image_path, '*.' + image_format))
             for image_path in exists_images:
                 image_name = os.path.basename(image_path).split('.')[0]
+                self.image_name_list.append(image_name)
                 label_name = image_name + '.npy'
                 density_map_path = os.path.join(self.density_map_path, label_name)
                 density_map_path = density_map_path if os.path.exists(density_map_path) else ''
                 self.file_path_list.append((image_path, density_map_path))
+
+    def get_order_image_name(self):
+        return self.image_name_list 
 
     def generate_image_and_density(self, size=None):
         for image_path, density_map_path in self.file_path_list:
@@ -35,7 +40,7 @@ class DatasetReader:
                 raise Exception("图像的尺寸和密度图的尺寸不匹配，请重新生成，或在generate_slice_and_labels方法中指定一个新的尺寸（size）")
             yield image, density_map
 
-    def generate_slice_and_labels(self, window_size=31, batch_size=4, size=None, acclumate_area=False):
+    def generate_slice_and_labels(self, window_size=31, batch_size=4, size=None, accumulate_area=False):
         image_batch = np.zeros((batch_size, window_size, window_size, 3), np.uint8)
         ground_truth_batch = np.zeros((batch_size), np.float)
         batch_index = 0
@@ -53,7 +58,7 @@ class DatasetReader:
                 for i in range(image.shape[0]):
                     for j in range(image.shape[1]):
                         cropped_image = np.array(padded_image[i: i + window_size, j: j + window_size])
-                        if acclumate_area:
+                        if accumulate_area:
                             ground_truth_value = np.sum(padded_density_map[i: i + window_size, j: j + window_size])
                         else:
                             ground_truth_value = padded_density_map[(2 * i + window_size) // 2, (2 * j + window_size) // 2]
