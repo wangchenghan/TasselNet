@@ -21,23 +21,24 @@ class TassenlNetTrainer:
         model = MODELS[self.model_name.lower()]['model'](input_shape)
         #optimizers
         if optimizer.lower() == 'sgd':
-            keras_optimizer = optimizers.SGD(lr=learning_rate, clipvalue=0.5)
+            keras_optimizer = optimizers.SGD(learning_rate=learning_rate, clipvalue=0.5)
         elif optimizer.lower()  == 'adagrad':
-            keras_optimizer = optimizers.Adagrad(lr=learning_rate, epsilon=None, decay=0.0)
+            keras_optimizer = optimizers.Adagrad(learning_rate=learning_rate, epsilon=None, decay=0.0)
         elif optimizer.lower()  == 'adadelta':
-            keras_optimizer = optimizers.Adadelta(lr=learning_rate, rho=0.95, epsilon=None, decay=0.0)
+            keras_optimizer = optimizers.Adadelta(learning_rate=learning_rate, rho=0.95, epsilon=None, decay=0.0)
         elif optimizer.lower()  == 'nadam':
-            keras_optimizer = optimizers.Adamax(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
+            keras_optimizer = optimizers.Adamax(learning_rate=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0)
         elif optimizer.lower()  == 'Adadelta':
-            keras_optimizer = optimizers.Nadam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
+            keras_optimizer = optimizers.Nadam(learning_rate=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.004)
         else:
-            keras_optimizer = optimizers.Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+            keras_optimizer = optimizers.Adam(learning_rate=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
         
         model.compile(loss=loss, optimizer=keras_optimizer)
         if self.paths_for_validate:
             raise NotImplementedError
         else:
-            model.fit_generator(training_set_generator, epochs=epochs, verbose=1)
+            model.fit(training_set_generator, epochs=epochs, verbose=1)
+        print(model.get_weights)
         model_save_name = '-'.join([str(i) for i in [image_size[0], image_size[1],
                                                     input_shape[0],input_shape[1], 
                                                     batch_size, epochs, learning_rate,
@@ -60,9 +61,9 @@ if __name__ == '__main__':
     # test1
     image_size = (224,224)
     input_shape = (31, 31, 3)
-    batch_size = 4
-    epochs = 10
-    learning_rate = 0.01
+    batch_size = 64
+    epochs = 1
+    learning_rate = 0.1
     optimizer = 'adm'
     loss = 'mean_squared_error'
 

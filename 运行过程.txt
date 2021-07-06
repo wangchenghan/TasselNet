@@ -1,0 +1,13 @@
+1.命令行
+  cd "TasselNet所在目录"
+2.命令行
+  conda create --name tasselnet python=3.6
+4.命令行
+  conda activate tasselnet
+5.命令行
+  pip install -r requirements.txt
+6.修改main函数下的image_path 和 density_map为实际运行的目录，这个目录是按照我的文件放置位置来的，前面的“/Users/Biomind/Documents/周文静/”需要替换为新的
+7.命令行
+  python train.py
+
+  
